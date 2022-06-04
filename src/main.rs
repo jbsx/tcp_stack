@@ -5,9 +5,17 @@ fn main() -> io::Result<()>{
     loop{
         let recv_len = nic.recv(&mut buff).unwrap();
         if u16::from_be_bytes([buff[2], buff[3]]) != 0x0800 {continue}
-        match etherparse::Ipv4Header::from_slice(&buff[4..recv_len]){
-            Ok((header, _))=>{
-                eprintln!("Recieved {} bytes of IPV4 packet from {:?}", header.total_len(), header.source)
+        match etherparse::Ipv4HeaderSlice::from_slice(&buff[4..recv_len]){
+            Ok(header)=>{
+                eprintln!("Recieved {} bytes of IPV4 packet from {:?}", header.payload_len(), header.source_addr());
+                match etherparse::TcpHeaderSlice::from_slice(&buff[4+header.slice().len()..]){
+                    Ok(res)=>{
+                        eprintln!("{:?}aslfdkjaslkdjlj", &res);
+                    },
+                    Err(e)=>{
+                        eprintln!("{}", e);
+                    }
+                }
             },
             Err(e)=>{
                 eprintln!("{}", e)
