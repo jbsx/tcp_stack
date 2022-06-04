@@ -1,5 +1,5 @@
 [package]
-name = "tcpImpl"
+name = "tcp_impl"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 tun-tap = "0.1.2"
+etherparse = "0.10.1"
