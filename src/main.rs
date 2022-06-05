@@ -7,10 +7,10 @@ fn main() -> io::Result<()>{
         if u16::from_be_bytes([buff[2], buff[3]]) != 0x0800 {continue}
         match etherparse::Ipv4HeaderSlice::from_slice(&buff[4..recv_len]){
             Ok(header)=>{
-                eprintln!("Recieved {} bytes of IPV4 packet from {:?}", header.payload_len(), header.source_addr());
+                eprintln!("Recieved {} bytes of IPV4 packet from {:?} ||| {:?}", header.payload_len(), header.source_addr(), header.destination_addr());
                 match etherparse::TcpHeaderSlice::from_slice(&buff[4+header.slice().len()..]){
                     Ok(res)=>{
-                        eprintln!("{:?}aslfdkjaslkdjlj", &res);
+                        eprintln!("{:?}asdfjkl;ljk;asdf", &res);
                     },
                     Err(e)=>{
                         eprintln!("{}", e);
