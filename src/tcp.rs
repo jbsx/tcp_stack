@@ -1,12 +1,13 @@
-pub(crate) struct State{
-
+pub(crate) enum State{
+    Closed,
+    Listen,
+    SynRcvd,
+    Estab
 }
 
 impl Default for State{
     fn default() -> Self {
-        State { 
-            
-        }
+        State::Closed
     }
 }
 
@@ -17,7 +18,39 @@ impl State{
         ip_header: etherparse::Ipv4HeaderSlice<'a>,
         buff: &'a [u8]
     ){
-        eprintln!("{:?} : {:?} -> {:?} : {:?}, {:?} bytes", ip_header.source_addr(), tcp_header.source_port(), ip_header.destination_addr(), tcp_header.destination_port(), buff.len());
+        match *self{
+            State::Closed => {
+                return
+            },
+            State::Listen => {
+                let mut buff = [0u8; 1504];
+                if !tcp_header.syn(){return}
+                let synack = etherparse::TcpHeader::new(
+                    tcp_header.source_port(),
+                    tcp_header.destination_port(),
+                    0,
+                    0
+                );
+                synack.syn = true;
+                synack.ack = true;
+                let mut ip = etherparse::Ipv4Header::new(
+                    synack.slice().len(),
+                    64,
+                    etherparse::IpNumber::Tcp,
+                    ip_header.source_addr(),
+                    ip_header.destination_addr()
+                );
+                let mut unwritten = &mut buff[..];
+                ip.write(unwritten);
+                synack.write(unwritten);
+            }
+        }
+        eprintln!("{:?} : {:?} -> {:?} : {:?}, {:?} bytes", 
+            ip_header.source_addr(), 
+            tcp_header.source_port(), 
+            ip_header.destination_addr(), 
+            tcp_header.destination_port(), 
+            buff.len());
     }
 }
 

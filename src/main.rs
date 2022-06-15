@@ -31,6 +31,7 @@ fn main() -> io::Result<()> {
                 );
                 match etherparse::TcpHeaderSlice::from_slice(&buff[4 + ip_header.slice().len()..]) {
                     Ok(tcp_header) => {
+                        eprintln!("{:?}", tcp_header.destination_port());
                         let data_len = ip_header.slice().len() + tcp_header.slice().len() + 4;
                         connections.entry(AddrQuad {
                                 src: ip_header.source_addr(),
@@ -38,7 +39,7 @@ fn main() -> io::Result<()> {
                                 dst: ip_header.destination_addr(),
                                 dst_port: tcp_header.destination_port(),
                             }).or_default()
-                            .on_packet(tcp_header, ip_header, &buff[data_len..]);
+                            .on_packet(tcp_header, ip_header, &buff[data_len..recv_len]);
                     }
                     Err(e) => {
                         eprintln!("{}", e);
