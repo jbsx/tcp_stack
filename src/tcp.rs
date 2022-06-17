@@ -14,6 +14,7 @@ impl Default for State{
 impl State{
     pub fn on_packet<'a>(
         &mut self,
+        nic: &mut tun_tap::Iface
         tcp_header: etherparse::TcpHeaderSlice<'a>,
         ip_header: etherparse::Ipv4HeaderSlice<'a>,
         buff: &'a [u8]
@@ -26,8 +27,8 @@ impl State{
                 let mut buff = [0u8; 1504];
                 if !tcp_header.syn(){return}
                 let synack = etherparse::TcpHeader::new(
-                    tcp_header.source_port(),
                     tcp_header.destination_port(),
+                    tcp_header.source_port(),
                     0,
                     0
                 );
@@ -37,12 +38,13 @@ impl State{
                     synack.slice().len(),
                     64,
                     etherparse::IpNumber::Tcp,
-                    ip_header.source_addr(),
-                    ip_header.destination_addr()
+                    ip_header.source(),
+                    ip_header.destination()
                 );
                 let mut unwritten = &mut buff[..];
                 ip.write(unwritten);
                 synack.write(unwritten);
+                nic.write(unwritten);
             }
         }
         eprintln!("{:?} : {:?} -> {:?} : {:?}, {:?} bytes", 

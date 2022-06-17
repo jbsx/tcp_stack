@@ -39,7 +39,7 @@ fn main() -> io::Result<()> {
                                 dst: ip_header.destination_addr(),
                                 dst_port: tcp_header.destination_port(),
                             }).or_default()
-                            .on_packet(tcp_header, ip_header, &buff[data_len..recv_len]);
+                            .on_packet(&mut nic, tcp_header, ip_header, &buff[data_len..recv_len]);
                     }
                     Err(e) => {
                         eprintln!("{}", e);
@@ -52,4 +52,3 @@ fn main() -> io::Result<()> {
         }
     }
 }
-
