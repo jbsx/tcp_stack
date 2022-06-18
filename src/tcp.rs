@@ -14,7 +14,7 @@ impl Default for State{
 impl State{
     pub fn on_packet<'a>(
         &mut self,
-        nic: &mut tun_tap::Iface
+        nic: &mut tun_tap::Iface,
         tcp_header: etherparse::TcpHeaderSlice<'a>,
         ip_header: etherparse::Ipv4HeaderSlice<'a>,
         buff: &'a [u8]
