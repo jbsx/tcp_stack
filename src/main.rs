@@ -14,7 +14,7 @@ struct AddrQuad {
 
 fn main() -> io::Result<()> {
     let mut connections: HashMap<AddrQuad, tcp::State> = Default::default();
-    let nic = tun_tap::Iface::new("tun", tun_tap::Mode::Tun)?;
+    let mut nic = tun_tap::Iface::new("tun", tun_tap::Mode::Tun)?;
     let mut buff = [0u8; 1504];
     loop {
         let recv_len = nic.recv(&mut buff).unwrap();
@@ -38,8 +38,8 @@ fn main() -> io::Result<()> {
                                 src_port: tcp_header.source_port(),
                                 dst: ip_header.destination_addr(),
                                 dst_port: tcp_header.destination_port(),
-                            }).or_default()
-                            .on_packet(&mut nic, tcp_header, ip_header, &buff[data_len..recv_len]);
+                            }).or_default();
+                            //.on_packet(&mut nic, tcp_header, ip_header, &buff[data_len..recv_len])?;
                     }
                     Err(e) => {
                         eprintln!("{}", e);
