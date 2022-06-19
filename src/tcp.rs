@@ -19,16 +19,16 @@ impl State{
         nic: &mut tun_tap::Iface,
         tcp_header: etherparse::TcpHeaderSlice<'a>,
         ip_header: etherparse::Ipv4HeaderSlice<'a>,
-        buff: &'a [u8]
+        _data: &'a [u8]
     ) -> io::Result<usize> {
         match *self{
             State::Closed => {
                 return Ok(0)
             },
             State::Listen => {
-                let mut buff = [0u8; 1500];
+                let mut buf = [0u8; 1500];
                 if !tcp_header.syn(){return Ok(0)}
-                let mut synack = etherparse::TcpHeader::new(
+                let synack = etherparse::TcpHeader::new(
                     tcp_header.destination_port(),
                     tcp_header.source_port(),
                     unimplemented!(),
@@ -43,12 +43,13 @@ impl State{
                     ip_header.destination()
                 );
                 let unwritten = {
-                    let mut unwritten = &mut buff[..];
-                    ip.write(&mut unwritten);
-                    synack.write(&mut unwritten);
+                    let mut unwritten = &mut buf[..];
+                    ip.write(&mut unwritten).unwrap();
+                    synack.write(&mut unwritten)?;
                     unwritten.len()
                 };
-                nic.send(&buff[..unwritten])
+                eprintln!("{:?}", &buf[..unwritten]);
+                nic.send(&buf[..unwritten])
             },
         }
     }
