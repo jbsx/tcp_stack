@@ -29,7 +29,7 @@ fn main() -> io::Result<()> {
                     ip_header.source_addr(),
                     ip_header.destination_addr()
                 );
-                match etherparse::TcpHeaderSlice::from_slice(&buff[4 + ip_header.slice().len()..]) {
+                match etherparse::TcpHeaderSlice::from_slice(&buff[4 + ip_header.slice().len()..recv_len]) {
                     Ok(tcp_header) => {
                         eprintln!("{:?}", tcp_header.destination_port());
                         let data_len = ip_header.slice().len() + tcp_header.slice().len() + 4;
@@ -38,11 +38,11 @@ fn main() -> io::Result<()> {
                                 src_port: tcp_header.source_port(),
                                 dst: ip_header.destination_addr(),
                                 dst_port: tcp_header.destination_port(),
-                            }).or_default();
-                            //.on_packet(&mut nic, tcp_header, ip_header, &buff[data_len..recv_len])?;
+                            }).or_default()
+                            .on_packet(&mut nic, tcp_header, ip_header, &buff[data_len..recv_len])?;
                     }
                     Err(e) => {
-                        eprintln!("{}", e);
+                        eprintln!("ignoring weird packet : {}", e);
                     }
                 }
             }

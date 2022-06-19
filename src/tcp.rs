@@ -33,23 +33,22 @@ impl State{
                     tcp_header.source_port(),
                     unimplemented!(),
                     unimplemented!());
-            synack.syn = true;
-            synack.ack = true;
-            let mut ip = etherparse::Ipv4Header::new(
-                synack.header_len(),
-                64,
-                etherparse::IpNumber::Tcp,
-                ip_header.source(),
-                ip_header.destination()
-            );
-            let unwritten = {
-                let mut unwritten = &mut buff[..];
-                ip.write(&mut unwritten);
-                synack.write(&mut unwritten)?;
-                unwritten.len()
-            };
-            nic.send(&buff[..unwritten])?;
-            return Ok(0)
+                synack.syn = true;
+                synack.ack = true;
+                let mut ip = etherparse::Ipv4Header::new(
+                    synack.header_len(),
+                    64,
+                    etherparse::IpNumber::Tcp,
+                    ip_header.source(),
+                    ip_header.destination()
+                );
+                let unwritten = {
+                    let mut unwritten = &mut buff[..];
+                    ip.write(&mut unwritten);
+                    synack.write(&mut unwritten);
+                    unwritten.len()
+                };
+                nic.send(&buff[..unwritten])
             },
         }
     }
